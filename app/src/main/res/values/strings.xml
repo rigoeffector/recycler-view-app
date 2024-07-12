@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">RecyclerCompose</string>
+    <string name="home">All Items</string>
+    <string name="more">More Info</string>
+
+</resources>
