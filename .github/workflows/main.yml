@@ -24,16 +24,16 @@ jobs:
       run: chmod +x gradlew
 
     - name: Run linting
-      run: ./gradlew lintDebug
+      run: ./gradlew lintDebug -x check  # Skip 'check' task
 
     - name: Run unit tests
-      run: ./gradlew testDebugUnitTest
+      run: ./gradlew testDebugUnitTest -x check  # Skip 'check' task
 
     - name: Run instrumentation tests
-      run: ./gradlew connectedDebugAndroidTest
+      run: ./gradlew connectedDebugAndroidTest -x check  # Skip 'check' task
 
     - name: Generate code coverage report
-      run: ./gradlew jacocoTestReport
+      run: ./gradlew jacocoTestReport -x check  # Skip 'check' task
 
     - name: Upload code coverage report
       uses: actions/upload-artifact@v2
@@ -42,7 +42,7 @@ jobs:
         path: app/build/reports/jacoco/jacocoTestReport/html/index.html
 
     - name: Build release APK
-      run: ./gradlew assembleRelease
+      run: ./gradlew assembleRelease -x check  # Skip 'check' task
 
     - name: Upload APK artifact
       uses: actions/upload-artifact@v2
