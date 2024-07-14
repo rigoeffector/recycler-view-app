@@ -3,31 +3,48 @@ name: Android CI/CD
 on:
   push:
     branches:
-      - main  # Trigger for main branch
-      - staging   # Trigger for dev branch
-      - dev   # Trigger for dev branch
+      - main  # Adjust branch as needed
 
 jobs:
-  build-dev:
+  build:
 
     runs-on: ubuntu-latest
 
-    if: github.ref == 'refs/heads/dev'  # Only runs for the dev branch
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
-      # Add other steps like setting up JDK, running tests, etc.
+    - name: Set up JDK 11
+      uses: actions/setup-java@v2
+      with:
+        java-version: '11'
 
-  build-master:
+    - name: Grant execute permission for Gradlew
+      run: chmod +x gradlew
 
-    runs-on: ubuntu-latest
+    - name: Run linting
+      run: ./gradlew lintDebug
 
-    if: github.ref == 'refs/heads/main'  # Only runs for the main branch
+    - name: Run unit tests
+      run: ./gradlew testDebugUnitTest
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+    - name: Run instrumentation tests
+      run: ./gradlew connectedDebugAndroidTest
 
-      # Add other steps like setting up JDK, running tests, etc.
+    - name: Generate code coverage report
+      run: ./gradlew jacocoTestReport
+
+    - name: Upload code coverage report
+      uses: actions/upload-artifact@v2
+      with:
+        name: coverage-report
+        path: app/build/reports/jacoco/jacocoTestReport/html/index.html
+
+    - name: Build release APK
+      run: ./gradlew assembleRelease
+
+    - name: Upload APK artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: release-apk
+        path: app/build/outputs/apk/release/app-release.apk
