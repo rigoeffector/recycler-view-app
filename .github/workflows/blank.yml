@@ -1,0 +1,33 @@
+name: Android CI/CD
+
+on:
+  push:
+    branches:
+      - main  # Trigger for main branch
+      - staging   # Trigger for dev branch
+      - dev   # Trigger for dev branch
+
+jobs:
+  build-dev:
+
+    runs-on: ubuntu-latest
+
+    if: github.ref == 'refs/heads/dev'  # Only runs for the dev branch
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # Add other steps like setting up JDK, running tests, etc.
+
+  build-master:
+
+    runs-on: ubuntu-latest
+
+    if: github.ref == 'refs/heads/main'  # Only runs for the main branch
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # Add other steps like setting up JDK, running tests, etc.
