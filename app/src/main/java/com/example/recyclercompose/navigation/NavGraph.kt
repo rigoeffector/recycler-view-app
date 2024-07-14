@@ -14,7 +14,7 @@ import com.example.recyclercompose.screens.DetailsViewScreen
 import com.example.recyclercompose.viewmodel.DataViewModel
 
 @Composable
-fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
+fun NavGraph(navController: NavHostController) {
     val viewModel: DataViewModel = viewModel()
 
     NavHost(navController = navController, startDestination = "splashScreen") {

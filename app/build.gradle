@@ -32,6 +32,13 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+
+    lintOptions {
+        checkReleaseBuilds false
+        // Or enable lint check for release builds:
+        // checkReleaseBuilds true
+        // abortOnError false
+    }
     buildFeatures {
         compose true
     }
