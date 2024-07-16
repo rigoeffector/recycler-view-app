@@ -33,8 +33,8 @@ class DataViewModelTest {
         Dispatchers.setMain(testDispatcher)
 
         coEvery { apiService.fetchData() } returns listOf(
-            DataModel("1", "Item 1", data = null),
-            DataModel("2", "Item 2", data = null)
+            DataModel(1, "Item 1", data = null),
+            DataModel(2, "Item 2", data = null)
         )
 
         viewModel = DataViewModel(apiService)
@@ -92,8 +92,9 @@ class DataViewModelTest {
     fun getItemById_found() {
         // Arrange
         val data = listOf(
-            DataModel("1", "Item 1", data = null),
-            DataModel("2", "Item 2", data = null)
+            DataModel(1
+                , "Item 1", data = null),
+            DataModel(2, "Item 2", data = null)
         )
         viewModel._data.value = data
 
@@ -109,8 +110,8 @@ class DataViewModelTest {
     fun getItemById_notFound() {
         // Arrange
         val data = listOf(
-            DataModel("1", "Item 1", data = null),
-            DataModel("2", "Item 2", data = null)
+            DataModel(1, "Item 1", data = null),
+            DataModel(2, "Item 2", data = null)
         )
         viewModel._data.value = data
 
