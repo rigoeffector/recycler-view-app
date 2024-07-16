@@ -40,6 +40,6 @@ class DataViewModel(private val apiService: ApiService = RetrofitInstance.apiSer
     }
 
     fun getItemById(itemId: String): DataModel? {
-        return _data.value.find { it.id == itemId }
+        return _data.value.find { it.id.toString() == itemId }
     }
 }
