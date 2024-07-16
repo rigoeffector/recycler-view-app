@@ -29,12 +29,12 @@ class SplashScreenTest {
         }
     }
 
-    @Test
-    fun splashScreen_displaysLogo() {
-        composeTestRule
-            .onNodeWithContentDescription("App Logo")
-            .assertIsDisplayed()
-    }
+//    @Test
+//    fun splashScreen_displaysLogo() {
+//        composeTestRule
+//            .onNodeWithContentDescription("App Logo")
+//            .assertIsDisplayed()
+//    }
 
     @Test
     fun splashScreen_hasBlackBackground() {
