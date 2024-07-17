@@ -82,12 +82,11 @@ jobs:
 
       # Install Android SDK Build Tools and System Images
       - name: Install Android SDK Build Tools and System Images
-        run: |
-          sdkmanager --install "build-tools;34.0.0" "platform-tools" "platforms;android-30" "system-images;android-30;google_apis;x86"
+        run: sdkmanager --install "build-tools;34.0.0" "platform-tools" "platforms;android-30" "system-images;android-30;google_apis;arm64-v8a"
 
       # Create AVD
       - name: Create AVD
-        run: echo "no" | avdmanager create avd -n test -k "system-images;android-30;google_apis;x86" --force
+        run: echo "no" | avdmanager create avd -n test -k "system-images;android-30;google_apis;arm64-v8a" --force
 
       # Start the emulator
       - name: Start emulator
