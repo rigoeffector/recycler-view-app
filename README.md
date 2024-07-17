@@ -62,6 +62,7 @@ The CI/CD pipeline includes the following steps:
 
 - Lint Check: Analyzes the code for potential errors and style issues.
 - Unit Tests: Runs all unit tests.
+- Build Debug APK: for user to test
 
 
 **To view the CI/CD pipeline:**
@@ -112,4 +113,6 @@ Development tools:
 
   ```bash
    ./gradlew connectedCheck
+
+
 
