@@ -41,82 +41,67 @@ jobs:
 #        with:
 #          name: unit_test_report
 #          path: app/build/reports/tests/testDebugUnitTest/
-  name: Instrumented Test
+  instrumented-test:
+    runs-on: macos-latest
 
-  on:
-    push:
-      branches:
-        - main
-    pull_request:
-      branches:
-        - main
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v2
 
-  jobs:
-    instrumented-test:
-      runs-on: macos-latest
+      # Set up JDK 11
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'temurin'
 
-      steps:
-        - name: Checkout the code
-          uses: actions/checkout@v2
+      # Setup Android SDK
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2
+        with:
+          channel: 0
 
-        # Set up JDK 11
-        - name: Set up JDK 11
-          uses: actions/setup-java@v2
-          with:
-            java-version: '11'
-            distribution: 'temurin'
+      # Accept SDK licenses
+      - name: Accept SDK licenses
+        run: yes | sdkmanager --licenses
 
-        # Setup Android SDK
-        - name: Setup Android SDK
-          uses: android-actions/setup-android@v2
-          with:
-            channel: 0
+      # Cache Gradle packages
+      - name: Cache Gradle packages
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
 
-        # Accept SDK licenses
-        - name: Accept SDK licenses
-          run: yes | sdkmanager --licenses
+      # Grant execute permission for gradlew
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
 
-        # Cache Gradle packages
-        - name: Cache Gradle packages
-          uses: actions/cache@v2
-          with:
-            path: |
-              ~/.gradle/caches
-              ~/.gradle/wrapper
-            key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-            restore-keys: |
-              ${{ runner.os }}-gradle-
+      # Install Android SDK Build Tools and System Images
+      - name: Install Android SDK Build Tools and System Images
+        run: sdkmanager --install "build-tools;34.0.0" "platform-tools" "platforms;android-30" "system-images;android-30;google_apis;x86"
 
-        # Grant execute permission for gradlew
-        - name: Grant execute permission for gradlew
-          run: chmod +x gradlew
+      # Create AVD
+      - name: Create AVD
+        run: echo "no" | avdmanager create avd -n test -k "system-images;android-30;google_apis;x86" --force
 
-        # Install Android SDK Build Tools and System Images
-        - name: Install Android SDK Build Tools and System Images
-          run: sdkmanager --install "build-tools;34.0.0" "platform-tools" "platforms;android-30" "system-images;android-30;google_apis;x86"
+      # Start the emulator
+      - name: Start emulator
+        run: |
+          $ANDROID_HOME/emulator/emulator -avd test -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim &
+          adb wait-for-device
+          adb shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
 
-        # Create AVD
-        - name: Create AVD
-          run: echo "no" | avdmanager create avd -n test -k "system-images;android-30;google_apis;x86" --force
+      # Run instrumented tests
+      - name: Run instrumented tests
+        run: ./gradlew connectedCheck --info
 
-        # Start the emulator
-        - name: Start emulator
-          run: $ANDROID_HOME/emulator/emulator -avd test -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim &
-          background: true
-
-        # Wait for emulator to boot
-        - name: Wait for emulator to boot
-          run: |
-            adb wait-for-device
-            adb shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
-
-        # Run instrumented tests
-        - name: Run instrumented tests
-          run: ./gradlew connectedCheck --info
-
-        # Upload instrumented test report
-        - name: Upload instrumented test report
-          uses: actions/upload-artifact@v2
-          with:
-            name: instrumented_test_report
-            path: app/build/reports/androidTests/connected/
+      # Upload instrumented test report
+      - name: Upload instrumented test report
+        uses: actions/upload-artifact@v2
+        with:
+          name: instrumented_test_report
+          path: app/build/reports/androidTests/connected/
