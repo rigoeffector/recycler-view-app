@@ -6,6 +6,10 @@ plugins {
 android {
     compileSdk 34
 
+    testOptions {
+        unitTests.includeAndroidResources = true
+        animationsDisabled = true
+    }
     defaultConfig {
         applicationId "com.example.recyclercompose"
         minSdk 21
