@@ -58,7 +58,8 @@ jobs:
       # Setup Android SDK
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
-
+        with:
+          channel: 0
 
       # Accept SDK licenses
       - name: Accept SDK licenses
@@ -81,17 +82,16 @@ jobs:
 
       # Install Android SDK Build Tools and System Images
       - name: Install Android SDK Build Tools and System Images
-        run: sdkmanager --install "build-tools;34.0.0" "platform-tools" "platforms;android-30" "system-images;android-30;google_apis;x86"
+        run: sdkmanager --install "build-tools;34.0.0" "platform-tools" "platforms;android-30" "system-images;android-30;google_apis;arm64-v8a"
 
       # Create AVD
       - name: Create AVD
-        run: echo "no" | avdmanager create avd -n test -k "system-images;android-30;google_apis;x86" --force
+        run: echo "no" | avdmanager create avd -n test -k "system-images;android-30;google_apis;arm64-v8a" --force
 
       # Start the emulator
       - name: Start emulator
         run: |
           $ANDROID_HOME/emulator/emulator -avd test -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim &
-          sleep 30 # Wait for emulator to fully start
           adb wait-for-device
           adb shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
 
