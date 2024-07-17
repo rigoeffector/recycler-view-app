@@ -89,7 +89,7 @@ jobs:
         run: echo "no" | avdmanager create avd -n test -k "system-images;android-30;google_apis;arm64-v8a" --force
 
       # Start the emulator
-      - name: Start emulator
+      - name: Start ARM-based emulator
         run: |
           $ANDROID_HOME/emulator/emulator -avd test -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim &
           adb wait-for-device
