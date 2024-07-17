@@ -58,6 +58,10 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
 
+      # Accept Android SDK licenses
+      - name: Accept SDK licenses
+        run: yes | sdkmanager --licenses
+
       # Cache Gradle packages
       - name: Cache Gradle packages
         uses: actions/cache@v2
@@ -75,22 +79,26 @@ jobs:
 
       # Install Android SDK Build Tools and System Images
       - name: Install Android SDK Build Tools and System Images
-        run: sdkmanager --install "build-tools;34.0.0" platform-tools "platforms;android-30" "system-images;android-30;google_apis;x86"
+        run: sdkmanager --install "build-tools;34.0.0" "platform-tools" "platforms;android-30" "system-images;android-30;google_apis;x86"
 
-      # Start the emulator
-      - name: Start the emulator
+      # Create and start the emulator
+      - name: Create AVD and start emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 30
           target: google_apis
           abi: x86
           profile: Nexus 5X
+          force-avd-creation: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
           disable-animations: true
-          script: |
-            adb wait-for-device shell getprop init.svc.bootanim | grep stopped
+          script: echo "Generated AVD snapshot for caching."
 
-      # Verify that the emulator is running
+      # Wait for the emulator to boot
+      - name: Wait for emulator to boot
+        run: adb wait-for-device shell getprop sys.boot_completed | grep 1
+
+      # Verify emulator is running
       - name: Verify emulator is running
         run: adb devices
 
