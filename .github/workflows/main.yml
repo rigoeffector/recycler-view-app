@@ -11,97 +11,49 @@ on:
   workflow_dispatch:
 
 jobs:
-#  lint:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Checkout the code
-#        uses: actions/checkout@v2
-#
-#      - name: Run Lint
-#        run: ./gradlew lintDebug
-#
-#      - name: Upload html test report
-#        uses: actions/upload-artifact@v2
-#        with:
-#          name: lint.html
-#          path: app/build/reports/lint-results-debug.html
-#
-#  unit-test:
-#    needs: [ lint ]
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Checkout the code
-#        uses: actions/checkout@v2
-#
-#      - name: Run tests
-#        run: ./gradlew test
-#
-#      - name: Upload test report
-#        uses: actions/upload-artifact@v2
-#        with:
-#          name: unit_test_report
-#          path: app/build/reports/tests/testDebugUnitTest/
-  instrumented-test:
-    runs-on: macos-latest
-
+  lint:
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout the code
         uses: actions/checkout@v2
 
-      # Set up JDK 17
-      - name: Set up JDK 17
-        uses: actions/setup-java@v2
-        with:
-          java-version: '17'
-          distribution: 'temurin'
+      - name: Run Lint
+        run: ./gradlew lintDebug
 
-      # Setup Android SDK
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v2
-        with:
-          channel: 0
-
-      # Accept SDK licenses
-      - name: Accept SDK licenses
-        run: yes | sdkmanager --licenses
-
-      # Cache Gradle packages
-      - name: Cache Gradle packages
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-
-      # Grant execute permission for gradlew
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
-      # Install Android SDK Build Tools and System Images
-      - name: Install Android SDK Build Tools and System Images
-        run: sdkmanager --install "build-tools;34.0.0" "platform-tools" "platforms;android-30" "system-images;android-30;google_apis;arm64-v8a"
-
-      # Create AVD
-      - name: Create AVD
-        run: echo "no" | avdmanager create avd -n test -k "system-images;android-30;google_apis;arm64-v8a" --force
-
-      # Start the emulator with HAXM
-      - name: Start emulator with HAXM
-        run: |
-          $ANDROID_HOME/emulator/emulator -avd test -no-window -accel auto -gpu swiftshader_indirect -noaudio -no-boot-anim &
-          adb wait-for-device
-          adb shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
-
-      # Run instrumented tests
-      - name: Run instrumented tests
-        run: ./gradlew connectedCheck --info
-
-      # Upload instrumented test report
-      - name: Upload instrumented test report
+      - name: Upload html test report
         uses: actions/upload-artifact@v2
         with:
-          name: instrumented_test_report
-          path: app/build/reports/androidTests/connected/
+          name: lint.html
+          path: app/build/reports/lint-results-debug.html
+
+  unit-test:
+    needs: [ lint ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v2
+
+      - name: Run tests
+        run: ./gradlew test
+
+      - name: Upload test report
+        uses: actions/upload-artifact@v2
+        with:
+          name: unit_test_report
+          path: app/build/reports/tests/testDebugUnitTest/
+
+  build-debug-apk:
+    needs: [ unit-test ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v2
+
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug
+
+      - name: Upload Debug APK
+        uses: actions/upload-artifact@v2
+        with:
+          name: debug_apk
+          path: app/build/outputs/apk/debug/*.apk
