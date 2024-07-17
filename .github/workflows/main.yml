@@ -75,30 +75,28 @@ jobs:
 
       # Install Android SDK Build Tools and System Images
       - name: Install Android SDK Build Tools and System Images
-        run: sdkmanager --install "build-tools;34.0.0" platform-tools "platforms;android-29" "system-images;android-29;google_apis;x86"
+        run: sdkmanager --install "build-tools;34.0.0" platform-tools "platforms;android-30" "system-images;android-30;google_apis;x86"
 
-      # Create AVD and generate snapshot for caching
-      - name: Create AVD and generate snapshot for caching
+      # Start the emulator
+      - name: Start the emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 30
           target: google_apis
           abi: x86
-          force-avd-creation: true
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          profile: Nexus 5X
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
           disable-animations: true
-          script: echo "Generated AVD snapshot for caching."
+          script: |
+            adb wait-for-device shell getprop init.svc.bootanim | grep stopped
+
+      # Verify that the emulator is running
+      - name: Verify emulator is running
+        run: adb devices
 
       # Run instrumented tests
       - name: Run instrumented tests
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 30
-          target: google_apis
-          abi: x86
-          script: |
-            adb devices
-            ./gradlew connectedCheck --info
+        run: ./gradlew connectedCheck --info
 
       # Upload instrumented test report
       - name: Upload instrumented test report
@@ -106,4 +104,3 @@ jobs:
         with:
           name: instrumented_test_report
           path: app/build/reports/androidTests/connected/
-
